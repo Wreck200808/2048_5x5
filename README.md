@@ -1,6 +1,6 @@
 # 2048_5x5 
-Group No.:2
-Group members:Lu Xiaoyi & Yu Wenfan (3035772274)
+Group No.:2   
+Group members:Lu Xiaoyi(3035770678) & Yu Wenfan (3035772274)   
 Topic:2048_5x5
 
 Game Discription: 2048_5x5 is a game similar to the original 2048 but have more features. There are 5*5, 25 in total boxes in the game. There can be number like 2, 4, 8 or larger in the box or the box is empty. You can slide all the numbers in one direction and the same number will be added and combined into one number. Then one empty box in the line of the opposite slide direction will be filled in 2 or 4 randomly. When there is no empty box for new number, the game is over and the largest number will be recorded. You can cancel the slide action and continue the unfinished game when you exit and run it again. You can also use props which can choose the next number is 4 in limited times. There is no limitation on the largest number.
