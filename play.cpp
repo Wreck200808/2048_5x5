@@ -15,12 +15,12 @@
 
 #include <iostream>
 #include <sys/ioctl.h>
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <string>
 using namespace std;
 
-
+//calculate the space after detecting the rows and columns
 void detspace(int rows, int columns, int &upspace, int &downspace, int &leftspace){
     if (columns / 2 == 1){
         upspace = (columns - 13) / 2;
@@ -38,7 +38,7 @@ void detspace(int rows, int columns, int &upspace, int &downspace, int &leftspac
     }
 }
 
-
+//output the form of numbers in boxes
 string opform(int x){
     if (x == 0){
         return("    ");
@@ -60,7 +60,7 @@ string opform(int x){
     }
 }
 
-
+//rotate the boxes in anticlockwise by 90 degrees
 void turnleft(int boxes[5][5]){
     int newboxes[5][5];
     for ( int i = 0; i < 5; i++ ){
@@ -75,6 +75,7 @@ void turnleft(int boxes[5][5]){
     }
 }
 
+//rotate the boxes in clockwise by 90 degrees
 void turnright(int boxes[5][5]){
     int newboxes[5][5];
     for ( int i = 0; i < 5; i++ ){
@@ -89,6 +90,7 @@ void turnright(int boxes[5][5]){
     }
 }
 
+//rotate the boxes in clockwise by 180 degrees
 void turnaround(int boxes[5][5]){
     int newboxes[5][5];
     for ( int i = 0; i < 5; i++ ){
@@ -103,7 +105,7 @@ void turnaround(int boxes[5][5]){
     }
 }
 
-
+//slide all numbers upward without adding up
 void pile(int boxes[5][5]){
     for ( int i = 0; i < 5; i++ ){
         for ( int k = 0; k < 4; k++ ){
@@ -117,7 +119,7 @@ void pile(int boxes[5][5]){
     }
 }
 
-
+//calculate the outcome while slide upward
 void upopr(int boxes[5][5]){
     pile(boxes);
     for ( int i = 0; i < 5; i++ ){
@@ -132,131 +134,186 @@ void upopr(int boxes[5][5]){
 }
 
 
+bool detectfail(int boxes[5][5]){
+    int failcount = 0;
+    for (int i = 0; i < 5; i++){
+        for (int j = 0; j < 5; j++){
+            if (boxes[i][j] == 0){
+                failcount = failcount + 1;
+            }
+        }
+    }
+    if (failcount == 0){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
-
+//play execution
 void play(){
 
-
+    //variables
     int boxes[5][5]; //boxes is used to store current status
     int columns, rows; //columns and rows of this terminal
-    int propnums, propson = 0;
-    int upspace, downspace, leftspace;
+    int propsnum, propson = 0; //the remaining numbers of props and the state of propsusage
+    int upspace, downspace, leftspace; //space numbers when showing boxes
     char keytype = '0';
     string opr;
+    bool iffail = false; //show whether you are fail
 
-
+    //check if it is a new game before staring up
+    //if it is a new game
     if (checkifempty == true){
         for (int i = 0; i < 5; i++){
             for (int j = 0; j < 5; j++){
                 boxes[i][j] = 0;
             }
         }
-        randselect(boxes[5][5], 0);
-        randselect(boxes[5][5], 0);
-        propnums = 3;
-        addline(3);
-        addline(boxes[5][5]);
+        randselect(boxes, 0);
+        randselect(boxes, 0);
+        propsnum = 3;
+        addline(boxes, 3);
     }
 
-
+    //if continue the original one
     else{
-        readlastline(boxes[5][5]);
+        readlastline(boxes, propsnum);
     }
 
-
+    //the loop for game
     while (keytype != 'e'){
 
-
+        //detect the size of terminal
         struct winsize w;
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
         rows = w.ws_row;
         columns = w.ws_col;
 
-
-        if ( rows < 25 | columns < 15 ) {
-            cout << "please adjust the window" << endl;
-            cout << "larger than 25*15" << endl;
+        //check if fail and show boxes or tips
+        if (iffail){
+            cout << "You have failed!" << endl;
+            cout << "Z:BACK X:AGAIN" << endl;
             for( int i = 0; i < columns - 3 ; i++ ){
                 cout << endl;
             }
         }
-
-
-        else {
-            cout << "Props remain: " << propnums << endl;
-            detspace(rows, columns, upspace, downspace, leftspace);
-            for ( int i = 0; i < upspace; i++){
-                cout << endl;
-            }
-            for ( int i = 0; i < leftspace; i++){
-                cout << " ";
-            }
-            cout << " ---- ---- ---- ---- ----" << endl;
-            for ( int i = 0; i < 5; i++){
-                for ( int j = 0; j < leftspace; j++){
-                    cout << " ";
+        else{
+            //warning if the terminal is smaller than 25*15
+            if ( rows < 25 | columns < 15 ) {
+                cout << "please adjust the window" << endl;
+                cout << "larger than 25*15" << endl;
+                for( int i = 0; i < columns - 3 ; i++ ){
+                    cout << endl;
                 }
-                for ( int j = 0; j < 5; j++){
-                    cout << "|" << opform(boxes[i][j]);
+            }
+
+            //show the boxes
+            else {
+                cout << "Props remain: " << propsnum << endl;
+                detspace(rows, columns, upspace, downspace, leftspace);
+                for ( int i = 0; i < upspace; i++){
+                    cout << endl;
                 }
-                cout << "|" << endl;
-                for ( int k = 0; k < leftspace; k++){
+                for ( int i = 0; i < leftspace; i++){
                     cout << " ";
                 }
                 cout << " ---- ---- ---- ---- ----" << endl;
-            }
-            for ( int i = 0; i < downspace; i++){
-                cout << endl;
-            }
-            if (propson == 0){
-                cout << "Your operation: ";
-            }
-            else if (propson == 1){
-                cout << "Your operation with props: ";
-            }
-            else if (propson == 2){
-                cout << "Wrong input, your operation: ";
-                propson = 0;
-            }
-            else{
-                cout << "Props cancelled, your operation: ";
-                propson = 0;
+                for ( int i = 0; i < 5; i++){
+                    for ( int j = 0; j < leftspace; j++){
+                        cout << " ";
+                    }
+                    for ( int j = 0; j < 5; j++){
+                        cout << "|" << opform(boxes[i][j]);
+                    }
+                    cout << "|" << endl;
+                    for ( int k = 0; k < leftspace; k++){
+                        cout << " ";
+                    }
+                    cout << " ---- ---- ---- ---- ----" << endl;
+                }
+                for ( int i = 0; i < downspace; i++){
+                    cout << endl;
+                }
+                if (propson == 0){
+                    cout << "Your operation: ";
+                }
+                else if (propson == 1){
+                    cout << "Your operation with props: ";
+                }
+                else if (propson == 2){
+                    cout << "Wrong input, your operation: ";
+                    propson = 0;
+                }
+                else{
+                    cout << "Props cancelled, your operation: ";
+                    propson = 0;
+                }
             }
         }
 
 
+        //operate the boxes
         cin >> opr;
         if (opr == "w"){
             upopr(boxes);
-            randselect(boxes[5][5], propson);
+            iffail = detectfail(boxes);
+            if (iffail == false){
+                randselect(boxes, propson);
+                if (propson == 1){
+                    propsnum--;
+                }
+            }
             propson = 0;
+            addline(boxes, propsnum);
         }
         else if (opr == "a"){
             turnright(boxes);
             upopr(boxes);
             turnleft(boxes);
-            randselect(boxes[5][5], propson);
+            iffail = detectfail(boxes);
+            if (iffail == false){
+                randselect(boxes, propson);
+                if (propson == 1){
+                    propsnum--;
+                }
+            }
             propson = 0;
+            addline(boxes, propsnum);
         }
         else if (opr == "d"){
             turnleft(boxes);
             upopr(boxes);
             turnright(boxes);
-            randselect(boxes[5][5], propson);
+            iffail = detectfail(boxes);
+            if (iffail == false){
+                randselect(boxes, propson);
+                if (propson == 1){
+                    propsnum--;
+                }
+            }
             propson = 0;
+            addline(boxes, propsnum);
         }
         else if (opr == "s"){
             turnaround(boxes);
             upopr(boxes);
             turnright(boxes);
-            randselect(boxes[5][5], propson);
+            iffail = detectfail(boxes);
+            if (iffail == false){
+                randselect(boxes, propson);
+                if (propson == 1){
+                    propsnum--;
+                }
+            }
             propson = 0;
+            addline(boxes, propsnum);
         }
         else if (opr == "q"){
             if (propson == 0){
-                if (propnums > 0){
+                if (propsnum > 0){
                     propson = 1;
-                    propnums--;
                 }
                 else{
                     propson = -1;
@@ -264,17 +321,33 @@ void play(){
             }
             else{
                 propson = 0;
-                propnums++;
             }
         }
         else if (opr == "e"){
-            exit(0);
+            keytype = 'e';
+        }
+        else if (opr == "z"){
+            deleteline();
+            readlastline(boxes, propsnum);
+        }
+        else if (opr == "x"){
+            deletedata();
+
+
+            for (int i = 0; i < 5; i++){
+                for (int j = 0; j < 5; j++){
+                    boxes[i][j] = 0;
+                }
+            }
+            randselect(boxes, 0);
+            randselect(boxes, 0);
+            propsnum = 3;
+            addline(boxes, 3);
         }
         else{
             propson = 2;
         }
     }
-
 
 
 }
