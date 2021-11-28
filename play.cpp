@@ -18,6 +18,7 @@
 #include <cstdio>
 #include <unistd.h>
 #include <string>
+#include <cmath>
 using namespace std;
 
 //calculate the space after detecting the rows and columns
@@ -39,24 +40,24 @@ void detspace(int rows, int columns, int &upspace, int &downspace, int &leftspac
 }
 
 //output the form of numbers in boxes
-string opform(int x){
+void opform(int x){
     if (x == 0){
-        return("    ");
+        cout << "    ";
     }
     else if (x <= 3){
-        return("  " + to_string(x) + " ");
+        cout << "  " << pow(2, x) << " ";
     }
     else if (x <= 6){
-        return(" " + to_string(x) + " ");
+        cout << " " << pow(2, x) << " ";
     }
     else if (x <= 9){
-        return(" " + to_string(x));
+        cout << " " << pow(2, x);
     }
     else if (x <= 13){
-        return(to_string(x));
+        cout << pow(2, x);
     }
     else{
-        return("2^" + to_string(x));
+        cout << "2^" << x;
     }
 }
 
@@ -225,7 +226,8 @@ void play(){
                         cout << " ";
                     }
                     for ( int j = 0; j < 5; j++){
-                        cout << "|" << opform(boxes[i][j]);
+                        cout << "|";
+                        opform(boxes[i][j]);
                     }
                     cout << "|" << endl;
                     for ( int k = 0; k < leftspace; k++){
